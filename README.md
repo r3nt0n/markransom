@@ -1,6 +1,6 @@
 # Ransompy
 
-Ransompy is a tool created to encrypt all the files that match a extension pattern using AES256. You can adjust the extensions which the app will look for in the main file code. The app will generate an AES256 key and an optional messsage in the desktop.
+Ransompy is a tool created to encrypt all the files that match a extension pattern. You can adjust the extensions which the app will look for in the main file code. The app will generate an AES256 key and an optional messsage in the desktop.
 
 It also includes the decipher tool.
 
