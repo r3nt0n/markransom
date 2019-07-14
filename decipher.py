@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# M4rk.R4NS0M [decipher]
-# R3nt0n 11/2016
+# MarkR4ns0m [decipher] (https://www.github.com/R3nt0n/markransom)
+# R3nt0n (https://www.github.com/R3nt0n)
 
 import os
 import argparse
