@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# M4rk.R4NS0M
-# R3nt0n 11/2016
+# MarkR4ns0m (https://www.github.com/R3nt0n/markransom)
+# R3nt0n (https://www.github.com/R3nt0n)
 
 import os
 from time import time
