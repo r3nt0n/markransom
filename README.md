@@ -22,7 +22,7 @@ Decrypt files encrypted with markransom.py.
 optional arguments:
   -h, --help            show this help message and exit
   -k file, --key file   the file which includes the key
-  -e .ext, --extension  encrypted extension files
+  -e .ext, --extension  encrypted files extension
   -f file, --file file  decrypt a single file  
 ```
 
