@@ -4,14 +4,29 @@
 ![[Date](https://github.com/R3nt0n)](http://img.shields.io/badge/date-2017-yellow.svg)
 
 
-# Ransompy
+# markransom
 
-Ransompy is a tool created to **encrypt** all the **files** that matches an extension pattern. You can adjust the extensions which the app will look for in the main file code. The app will generate an AES256 key and an optional messsage in the desktop.
+Markransom is a tool created to **encrypt** all the **files** that matches an extension pattern. Can be decrypted with decipher.py and the encryption key generated.
 
-It also includes the decipher tool.
+The app will generate an AES256 key and an optional messsage in the desktop. You can configure your own settings in the firsts lines of the script.
 
 This app was **written in 2017**.
 
+## Decipher usage
+
+```
+usage: decipher.py [-h] -k file [-e .ext] [-f file]  
+
+Decrypt files encrypted with markransom.py.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -k file, --key file   the file which includes the key
+  -e .ext, --extension .ext
+                        Indicates the file which includes the key. The key has
+                        to be encoded in base64.
+  -f file, --file file  decrypt a single file  
+```
 
 ## Requirements
 + Python 2.7

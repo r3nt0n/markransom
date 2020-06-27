@@ -1,78 +1,71 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# MarkR4ns0m [decipher] (https://www.github.com/R3nt0n/markransom)
-# R3nt0n (https://www.github.com/R3nt0n)
+# markransom.py - decipher
+# https://www.github.com/R3nt0n/markransom
 
-import os
+
+import os, sys
 import argparse
 from base64 import b64decode
 
 from Crypto.Cipher import AES
 
-from ransompy import findRootPaths, findFiles
+from markransom import find_root_paths, find_files
 
 
-def decipher(cipherData, key):
-    iv = (cipherData.split(':%:%:&:%:%:'))[0]
-    cipherText = (cipherData.split(':%:%:&:%:%:'))[1]
-    decipher = AES.new(key, AES.MODE_CBC, iv=iv)
-    decipherData = decipher.decrypt(cipherText)
-    decipherData = b64decode(decipherData)
-    return decipherData
+def decipher(cipher_data, key):
+    iv = (cipher_data.split(':%:%:&:%:%:'))[0]
+    cipher_text = (cipher_data.split(':%:%:&:%:%:'))[1]
+    d = AES.new(key, AES.MODE_CBC, iv=iv)
+    decipher_data = d.decrypt(cipher_text)
+    decipher_data = b64decode(decipher_data)
+    return decipher_data
 
 
-###############################################################################
-# PROCESAMIENTO DE ARGUMENTOS PASADOS AL EJECUTAR EL SCRIPT
-###############################################################################
-parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                 description='Decrypt files encrypted with the \
-                                              M4rk.R4NS0M script.')
+def proc_args():
+    parser = argparse.ArgumentParser(description='Decrypt files encrypted with markransom.py.')
+    parser.add_argument('-k', '--key', action="store", metavar='file',type=str,dest='key', required=True,
+                        help='the file which includes the key')
+    parser.add_argument('-e', '--extension', action="store", metavar='.ext', type=str, dest='ext',
+                        help='Indicates the file which includes the key. The key has to be encoded in base64.')
+    parser.add_argument('-f', '--file', action="store", metavar='file', type=str,dest='crypted_file', default='False',
+                        help='decrypt a single file')
+    args = parser.parse_args()
+    key = args.key
+    ext = args.ext
+    crypted_file = args.crypted_file
+    if not (ext and crypted_file):
+        print 'Too few arguments, -e or -f are required. Exiting...'
+        sys.exit(3)
 
-# Definición de todos los argumentos
-parser.add_argument('-k', '--key', action="store", metavar='file', type=str,
-                    dest='key', required=True,
-                    help='Indicates the file which includes the key. \
-                          The key has to be encoded in base64.')
+    return key,ext,crypted_file
 
-parser.add_argument('-f', '--file', action="store", metavar='file', type=str,
-                    dest='file', default='*.mrcrypt',
-                    help='specifies file to decrypt. If not specifies, the \
-                          script will search for all the files with the .cript \
-                          extension.')
 
-# Recogida en variables de cada argumento (referenciados por atributo dest)
-args = parser.parse_args()
-
-key = args.key
-cryptedFile = args.file
-###############################################################################
-
-# Decrypt all the files
-if cryptedFile == '*.mrcrypt':
-    rootPaths = findRootPaths()
-    fileList = findFiles(rootPaths, '.mrcrypt', 'non_excluded_mps')
-    # Desencriptamos los ficheros
-    for cryptedFile in fileList:
+def main():
+    # Proc args
+    key, ext, crypted_file = proc_args()
+    e = []
+    e.append(ext)
+    file_list = []
+    # Find files
+    if not crypted_file:
+        root_paths = find_root_paths()
+        file_list = find_files(root_paths, e, 'non_excluded_mps')
+    else:
+        file_list.append(crypted_file)
+    # Decrypt each file
+    for crypted_file in file_list:
         try:
-            with open(cryptedFile, 'rb') as fCrypt:
-                cipherData = fCrypt.read()
-            data = decipher(cipherData, key)
-            prevName = cryptedFile[:-6]
-            with open(prevName, 'wb+') as fPlain:
-                fPlain.write(cipherData)
-            os.remove(cryptedFile)
+            with open(crypted_file, 'rb') as f_crypt:
+                cipher_data = f_crypt.read()
+            data = decipher(cipher_data, key)
+            prev_name = crypted_file[:-6]
+            with open(prev_name, 'wb+') as f_plain:
+                f_plain.write(cipher_data)
+            os.remove(crypted_file)
         except:
             pass
 
-# Decrypts only the file specified by the --file argument
-else:
-    try:
-        with open(cryptedFile, 'rb') as fCrypt:
-            cipherData = fCrypt.read()
-        data = decipher(cipherData, key)
-        prevName = cryptedFile[:-6]
-        with open(prevName, 'wb+') as fPlain:
-            fPlain.write(cipherData)
-        os.remove(cryptedFile)
-    except:
-        pass
+
+if __name__ == '__main__':
+    main()
