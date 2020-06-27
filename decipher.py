@@ -27,7 +27,7 @@ def proc_args():
     parser.add_argument('-k', '--key', action="store", metavar='file',type=str,dest='key', required=True,
                         help='the file which includes the key')
     parser.add_argument('-e', '--extension', action="store", metavar='.ext', type=str, dest='ext',
-                        help='Indicates the file which includes the key. The key has to be encoded in base64.')
+                        help='encrypted files extension')
     parser.add_argument('-f', '--file', action="store", metavar='file', type=str,dest='crypted_file', default='False',
                         help='decrypt a single file')
     args = parser.parse_args()
