@@ -22,9 +22,7 @@ Decrypt files encrypted with markransom.py.
 optional arguments:
   -h, --help            show this help message and exit
   -k file, --key file   the file which includes the key
-  -e .ext, --extension .ext
-                        Indicates the file which includes the key. The key has
-                        to be encoded in base64.
+  -e .ext, --extension  encrypted extension files
   -f file, --file file  decrypt a single file  
 ```
 
