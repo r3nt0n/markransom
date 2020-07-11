@@ -66,7 +66,7 @@ def fake_checkdisk():
     print(u'{} disk errors found. Trying to repair disk...'.format(randint(2, 5)))
 
 def just_kidding(key_enc, msg):
-    if not (MSG_FILE and MSG_FILE):
+    if not (MSG_FILE and KEY_FILE):
         return False
     desktop_path = ''
     if os.name == 'nt':
